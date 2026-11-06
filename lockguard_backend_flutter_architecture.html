@@ -419,27 +419,219 @@
             gap: 10px;
         }
 
-        /* Mermaid Wrappers */
+        /* Mermaid Interactive Diagrams with Mouse Drag & Scroll */
         .diagram-container {
             background: var(--bg-surface);
             border: 1px solid var(--border-medium);
             border-radius: var(--radius-lg);
-            padding: 30px 24px;
-            margin: 24px 0;
-            overflow-x: auto;
-            box-shadow: var(--shadow-subtle);
+            padding: 20px;
+            margin: 28px 0;
+            overflow: hidden !important; /* Header remains strictly pinned at top */
+            position: relative;
+            box-shadow: var(--shadow-card);
+        }
+
+        .diagram-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-light);
         }
 
         .diagram-title {
-            font-size: 0.95rem;
+            font-size: 0.94rem;
             font-weight: 700;
             color: var(--secondary-light);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 16px;
+            letter-spacing: 0.04em;
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-bottom: 0;
+        }
+
+        .diagram-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .diagram-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            color: var(--text-heading);
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .diagram-btn:hover {
+            background: var(--bg-elevated);
+            border-color: var(--secondary);
+            color: var(--secondary-light);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+        }
+
+        .diagram-scroll-hint {
+            font-size: 0.74rem;
+            color: #38bdf8;
+            background: rgba(14, 165, 233, 0.09);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            user-select: none;
+        }
+
+        .diagram-zoom-badge {
+            font-size: 0.74rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            color: #38bdf8;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            padding: 4px 8px;
+            border-radius: 6px;
+            min-width: 48px;
+            text-align: center;
+            display: inline-block;
+            user-select: none;
+        }
+
+        .diagram-canvas {
+            width: 100%;
+            max-height: 740px;
+            overflow: auto !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 24px 20px;
+            background: #090e1a;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(56, 189, 248, 0.16);
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            position: relative;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            scrollbar-width: thin;
+            scrollbar-color: #38bdf8 rgba(15, 23, 42, 0.9);
+            transition: border-color 0.2s ease;
+        }
+
+        .diagram-canvas:hover {
+            border-color: rgba(56, 189, 248, 0.38);
+        }
+
+        .diagram-canvas.is-dragging {
+            cursor: grabbing !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+        }
+
+        .diagram-canvas.is-dragging * {
+            cursor: grabbing !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            pointer-events: none !important;
+        }
+
+        /* Sleek 2D Custom Scrollbars for Diagram Canvas */
+        .diagram-canvas::-webkit-scrollbar {
+            width: 9px;
+            height: 9px;
+        }
+        .diagram-canvas::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 4px;
+        }
+        .diagram-canvas::-webkit-scrollbar-thumb {
+            background: #1e3a5f;
+            border-radius: 4px;
+            border: 1px solid rgba(56, 189, 248, 0.45);
+        }
+        .diagram-canvas::-webkit-scrollbar-thumb:hover {
+            background: #0284c7;
+            border-color: #38bdf8;
+        }
+        .diagram-canvas::-webkit-scrollbar-corner {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        /* CRITICAL MERMAID OVERRIDES: PREVENT SHRINKING & ENFORCE HIGH READABILITY */
+        .diagram-container svg {
+            max-width: none !important; /* Overrides Mermaid inline max-width: 100% */
+            height: auto !important;
+            display: block;
+            margin: 0;
+            transition: width 0.15s ease-out, min-width 0.15s ease-out;
+        }
+
+        /* High-Resolution Minimum Widths so text labels are large and legible */
+        .diagram-topology svg {
+            min-width: 1550px !important;
+        }
+        .diagram-sequence svg {
+            min-width: 1250px !important;
+        }
+        .diagram-state svg {
+            min-width: 1100px !important;
+        }
+        .diagram-erd svg {
+            min-width: 1400px !important;
+        }
+
+        /* Large, Crisp Typography inside Mermaid Elements */
+        .diagram-container svg text {
+            font-family: var(--font-sans) !important;
+            font-size: 15px !important;
+        }
+
+        .diagram-container svg .nodeLabel, 
+        .diagram-container svg .label {
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            line-height: 1.4 !important;
+        }
+
+        .diagram-container svg .cluster-label span,
+        .diagram-container svg .cluster-label text {
+            font-size: 18px !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.02em !important;
+            fill: #38bdf8 !important;
+            color: #38bdf8 !important;
+        }
+
+        .diagram-container svg .actor text {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+        }
+
+        .diagram-container svg .messageText {
+            font-size: 15px !important;
+            font-weight: 500 !important;
+            font-family: var(--font-mono) !important;
+        }
+
+        .diagram-container svg .edgeLabel {
+            font-size: 14px !important;
+            font-weight: 600 !important;
         }
 
         /* Code Blocks */
@@ -888,24 +1080,6 @@
                 padding: 10px 8px;
             }
         }
-
-        .mobile-scroll-hint {
-            display: none;
-            font-size: 0.74rem;
-            color: var(--secondary-light);
-            margin-bottom: 6px;
-            align-items: center;
-            gap: 6px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        @media (max-width: 768px) {
-            .mobile-scroll-hint {
-                display: flex !important;
-            }
-        }
     </style>
 </head>
 <body>
@@ -977,9 +1151,20 @@
                 <span class="badge badge-pro">Cloud-Native Hybrid</span>
             </div>
 
-            <div class="diagram-container">
-                <div class="diagram-title"><i class="fa-solid fa-sitemap"></i> Global System Component & Communication Topology</div>
-                <pre class="mermaid">
+            <div class="diagram-container diagram-topology" id="diagram-topology-1">
+                <div class="diagram-header">
+                    <div class="diagram-title"><i class="fa-solid fa-sitemap text-cyan"></i> Global System Component & Communication Topology</div>
+                    <div class="diagram-controls">
+                        <span class="diagram-scroll-hint"><i class="fa-solid fa-hand text-cyan"></i> Drag to pan &bull; Scroll</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-topology-1', -0.25)" title="Zoom Out (Ctrl + Scroll Down)"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                        <span class="diagram-zoom-badge" id="zoom-val-diagram-topology-1">100%</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-topology-1', 0.25)" title="Zoom In (Ctrl + Scroll Up)"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                        <button class="diagram-btn" onclick="resetDiagram('diagram-topology-1')" title="Reset View and Position"><i class="fa-solid fa-arrows-rotate"></i> Reset</button>
+                        <button class="diagram-btn" onclick="centerDiagram('diagram-topology-1')" title="Center Diagram in Viewport"><i class="fa-solid fa-arrows-to-dot"></i> Center</button>
+                    </div>
+                </div>
+                <div class="diagram-canvas">
+                    <pre class="mermaid">
 flowchart TB
     subgraph MobileDevice["📱 Android Mobile Device (Flutter + Kotlin Native)"]
         direction TB
@@ -1057,7 +1242,8 @@ flowchart TB
     OFFLINE_DB -->|Online Flush| ALERT_API
     ALERT_API -->|Enqueue Email| MAIL_WORKER
     MAIL_WORKER --> SES --> RECIPIENTS
-                </pre>
+                    </pre>
+                </div>
             </div>
 
             <div class="grid-3">
@@ -1095,9 +1281,20 @@ flowchart TB
                     Users demand absolute privacy. Lockguard operates on a strict <strong>Zero Cloud Storage Policy</strong>. User intrusion photos and video recordings are never permanently stored on servers, never uploaded to Amazon S3 or Google Cloud Storage, and never accessible to staff or third parties.
                 </p>
 
-                <div class="diagram-container" style="margin: 14px 0;">
-                    <div class="diagram-title"><i class="fa-solid fa-bolt text-warning"></i> Ephemeral Dispatch & Immediate Server Purge Lifecycle</div>
-                    <pre class="mermaid">
+                <div class="diagram-container diagram-sequence" id="diagram-purge-2" style="margin: 18px 0;">
+                    <div class="diagram-header">
+                        <div class="diagram-title"><i class="fa-solid fa-bolt text-warning"></i> Ephemeral Dispatch & Immediate Server Purge Lifecycle</div>
+                        <div class="diagram-controls">
+                            <span class="diagram-scroll-hint"><i class="fa-solid fa-hand text-cyan"></i> Drag to pan &bull; Scroll</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-purge-2', -0.25)" title="Zoom Out (Ctrl + Scroll Down)"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                        <span class="diagram-zoom-badge" id="zoom-val-diagram-purge-2">100%</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-purge-2', 0.25)" title="Zoom In (Ctrl + Scroll Up)"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                        <button class="diagram-btn" onclick="resetDiagram('diagram-purge-2')" title="Reset View and Position"><i class="fa-solid fa-arrows-rotate"></i> Reset</button>
+                        <button class="diagram-btn" onclick="centerDiagram('diagram-purge-2')" title="Center Diagram in Viewport"><i class="fa-solid fa-arrows-to-dot"></i> Center</button>
+                        </div>
+                    </div>
+                    <div class="diagram-canvas">
+                        <pre class="mermaid">
 sequenceDiagram
     autonumber
     participant App as Mobile App (Flutter/Kotlin)
@@ -1126,7 +1323,8 @@ sequenceDiagram
         Disk-->>Worker: Files Permanently Deleted from Server
         Worker->>Worker: Log confirmation: "Ephemeral media purged for incident alt_98a72f"
     end
-                    </pre>
+                        </pre>
+                    </div>
                 </div>
 
                 <div class="grid-3" style="margin-top: 16px;">
@@ -1465,9 +1663,20 @@ NativeSmtpHelper.sendEmail(..., recipients = listOf(r1, r2, r3), ...)</code></pr
             </div>
 
             <!-- Intrusion Execution Flowchart -->
-            <div class="diagram-container">
-                <div class="diagram-title"><i class="fa-solid fa-person-burst text-danger"></i> Failed Unlock Attempt & Intrusion Alert Execution Sequence</div>
-                <pre class="mermaid">
+            <div class="diagram-container diagram-sequence" id="diagram-intrusion-3">
+                <div class="diagram-header">
+                    <div class="diagram-title"><i class="fa-solid fa-person-burst text-danger"></i> Failed Unlock Attempt & Intrusion Alert Execution Sequence</div>
+                    <div class="diagram-controls">
+                        <span class="diagram-scroll-hint"><i class="fa-solid fa-hand text-cyan"></i> Drag to pan &bull; Scroll</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-intrusion-3', -0.25)" title="Zoom Out (Ctrl + Scroll Down)"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                        <span class="diagram-zoom-badge" id="zoom-val-diagram-intrusion-3">100%</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-intrusion-3', 0.25)" title="Zoom In (Ctrl + Scroll Up)"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                        <button class="diagram-btn" onclick="resetDiagram('diagram-intrusion-3')" title="Reset View and Position"><i class="fa-solid fa-arrows-rotate"></i> Reset</button>
+                        <button class="diagram-btn" onclick="centerDiagram('diagram-intrusion-3')" title="Center Diagram in Viewport"><i class="fa-solid fa-arrows-to-dot"></i> Center</button>
+                    </div>
+                </div>
+                <div class="diagram-canvas">
+                    <pre class="mermaid">
 sequenceDiagram
     autonumber
     actor Thief as Unauthorized Handler
@@ -1525,7 +1734,8 @@ sequenceDiagram
         FGS->>API: Flush Queued Alerts to Backend
         API->>MAIL: Delayed Alert Dispatched with Incident Timestamp
     end
-                </pre>
+                    </pre>
+                </div>
             </div>
         </section>
 
@@ -1568,9 +1778,20 @@ sequenceDiagram
             </div>
 
             <!-- Auth Sequence Diagram -->
-            <div class="diagram-container">
-                <div class="diagram-title"><i class="fa-solid fa-key"></i> Google Sign-In Authentication & Token Exchange Sequence</div>
-                <pre class="mermaid">
+            <div class="diagram-container diagram-sequence" id="diagram-auth-4">
+                <div class="diagram-header">
+                    <div class="diagram-title"><i class="fa-solid fa-key text-primary"></i> Google Sign-In Authentication & Token Exchange Sequence</div>
+                    <div class="diagram-controls">
+                        <span class="diagram-scroll-hint"><i class="fa-solid fa-hand text-cyan"></i> Drag to pan &bull; Scroll</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-auth-4', -0.25)" title="Zoom Out (Ctrl + Scroll Down)"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                        <span class="diagram-zoom-badge" id="zoom-val-diagram-auth-4">100%</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-auth-4', 0.25)" title="Zoom In (Ctrl + Scroll Up)"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                        <button class="diagram-btn" onclick="resetDiagram('diagram-auth-4')" title="Reset View and Position"><i class="fa-solid fa-arrows-rotate"></i> Reset</button>
+                        <button class="diagram-btn" onclick="centerDiagram('diagram-auth-4')" title="Center Diagram in Viewport"><i class="fa-solid fa-arrows-to-dot"></i> Center</button>
+                    </div>
+                </div>
+                <div class="diagram-canvas">
+                    <pre class="mermaid">
 sequenceDiagram
     autonumber
     actor User
@@ -1608,7 +1829,8 @@ sequenceDiagram
     Laravel-->>Flutter: 200 OK { token, user, device, entitlements }
     Flutter->>Flutter: Store Token in flutter_secure_storage (AES Encrypted)
     Flutter->>Flutter: Update Global State (Riverpod / BLoC) -> Navigate to Dashboard
-                </pre>
+                    </pre>
+                </div>
             </div>
         </section>
 
@@ -1714,9 +1936,20 @@ sequenceDiagram
                 <span class="badge badge-pro">Event-Driven Lifecycle</span>
             </div>
 
-            <div class="diagram-container">
-                <div class="diagram-title"><i class="fa-solid fa-code-fork"></i> Google Play Subscription State Machine & RTDN Event Handlers</div>
-                <pre class="mermaid">
+            <div class="diagram-container diagram-state" id="diagram-state-5">
+                <div class="diagram-header">
+                    <div class="diagram-title"><i class="fa-solid fa-code-fork text-purple"></i> Google Play Subscription State Machine & RTDN Event Handlers</div>
+                    <div class="diagram-controls">
+                        <span class="diagram-scroll-hint"><i class="fa-solid fa-hand text-cyan"></i> Drag to pan &bull; Scroll</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-state-5', -0.25)" title="Zoom Out (Ctrl + Scroll Down)"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                        <span class="diagram-zoom-badge" id="zoom-val-diagram-state-5">100%</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-state-5', 0.25)" title="Zoom In (Ctrl + Scroll Up)"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                        <button class="diagram-btn" onclick="resetDiagram('diagram-state-5')" title="Reset View and Position"><i class="fa-solid fa-arrows-rotate"></i> Reset</button>
+                        <button class="diagram-btn" onclick="centerDiagram('diagram-state-5')" title="Center Diagram in Viewport"><i class="fa-solid fa-arrows-to-dot"></i> Center</button>
+                    </div>
+                </div>
+                <div class="diagram-canvas">
+                    <pre class="mermaid">
 stateDiagram-v2
     [*] --> Trialing : User Registers & Begins 7-Day Free Trial
     note right of Trialing : paymentState = 2 (7 Days Free)<br/>ALL 11 Features 100% UNLOCKED
@@ -1730,20 +1963,19 @@ stateDiagram-v2
     InGracePeriod --> Active : Payment Fixed
     InGracePeriod --> OnHold : Grace Period Window Ends<br/>(SUBSCRIPTION_ON_HOLD)
 
-    OnHold --> Active : Billing issue resolved in Play Store
+    OnHold --> Active : User fixes payment in Play Store
     OnHold --> Expired : Max Hold Time Exceeded<br/>(PROTECTION DISARMED & LOCKED)
 
-    Active --> CanceledPending : User turns off renewal in Play Store<br/>(SUBSCRIPTION_CANCELED)
+    Active --> CanceledPending : User cancels auto-renew in Play Store<br/>(SUBSCRIPTION_CANCELED)
     note right of CanceledPending : Protection stays ACTIVE until<br/>current_period_ends_at
 
     CanceledPending --> Expired : Period End Reached<br/>(PROTECTION DISARMED & LOCKED)
-    CanceledPending --> Active : User Resumes Subscription
+    CanceledPending --> Active : User Resumes Subscription before expiry
 
-    Expired --> ProtectionDisarmed : Watchdog Terminated & Features Locked
-    ProtectionDisarmed --> Active : User Re-Subscribes (Monthly / Yearly)
-    
-    Trialing --> LifetimeActive : Purchases Lifetime Deal (₹2,499)<br/>(ONE_TIME_PRODUCT_PURCHASED)
-    ProtectionDisarmed --> LifetimeActive : Purchases Lifetime Deal (₹2,499)<br/>(ONE_TIME_PRODUCT_PURCHASED)
+    Expired --> Active : Resubscribes to Monthly / Yearly
+    Expired --> LifetimeActive : Purchases One-Time ₹2,499 Deal
+    Trialing --> LifetimeActive : Purchases One-Time ₹2,499 Deal
+    Active --> LifetimeActive : Upgrades to Lifetime Deal (₹2,499)
     LifetimeActive --> LifetimeActive : Perpetual Full Protection (Never Expires)
                 </pre>
             </div>
@@ -1937,9 +2169,20 @@ stateDiagram-v2
             </div>
 
             <!-- Mermaid ERD Diagram -->
-            <div class="diagram-container">
-                <div class="diagram-title"><i class="fa-solid fa-diagram-project"></i> Relational Entity Relationship Diagram (ERD)</div>
-                <pre class="mermaid">
+            <div class="diagram-container diagram-erd" id="diagram-erd-6">
+                <div class="diagram-header">
+                    <div class="diagram-title"><i class="fa-solid fa-diagram-project text-cyan"></i> Relational Entity Relationship Diagram (ERD)</div>
+                    <div class="diagram-controls">
+                        <span class="diagram-scroll-hint"><i class="fa-solid fa-hand text-cyan"></i> Drag to pan &bull; Scroll</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-erd-6', -0.25)" title="Zoom Out (Ctrl + Scroll Down)"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                        <span class="diagram-zoom-badge" id="zoom-val-diagram-erd-6">100%</span>
+                        <button class="diagram-btn" onclick="zoomDiagram('diagram-erd-6', 0.25)" title="Zoom In (Ctrl + Scroll Up)"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                        <button class="diagram-btn" onclick="resetDiagram('diagram-erd-6')" title="Reset View and Position"><i class="fa-solid fa-arrows-rotate"></i> Reset</button>
+                        <button class="diagram-btn" onclick="centerDiagram('diagram-erd-6')" title="Center Diagram in Viewport"><i class="fa-solid fa-arrows-to-dot"></i> Center</button>
+                    </div>
+                </div>
+                <div class="diagram-canvas">
+                    <pre class="mermaid">
 erDiagram
     USERS ||--o{ DEVICES : "owns"
     USERS ||--o{ USER_SUBSCRIPTIONS : "subscribes_to"
@@ -2026,7 +2269,8 @@ erDiagram
         timestamp incident_timestamp
         timestamp created_at
     }
-                </pre>
+                    </pre>
+                </div>
             </div>
 
             <!-- SQL DDL -->
@@ -2175,7 +2419,6 @@ CREATE TABLE alert_logs (
                     </div>
                 </div>
 
-                <div class="mobile-scroll-hint"><i class="fa-solid fa-arrows-left-right"></i> Swipe table horizontally to view full API matrix &rarr;</div>
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -2875,7 +3118,6 @@ dev_dependencies:
                     </div>
                 </div>
 
-                <div class="mobile-scroll-hint"><i class="fa-solid fa-arrows-left-right"></i> Swipe table horizontally to view all 10 screens &rarr;</div>
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -2983,8 +3225,7 @@ dev_dependencies:
                 </div>
             </div>
 
-            <div class="screen-catalog-container">
-<div class="section-header" style="margin-top: 36px;">
+            <div class="section-header" style="margin-top: 36px;">
                 <div>
                     <h3 style="font-size: 1.45rem; color: var(--text-heading); font-weight: 700;">
                         <i class="fa-solid fa-mobile-screen-button text-cyan"></i> 9.3 Complete 10-Screen Mobile Architecture Catalog
@@ -2997,11 +3238,11 @@ dev_dependencies:
             </div>
 
             <!-- SCREEN 1: ONBOARDING -->
-            <div class="card screen-card" style="border-left: 4px solid var(--secondary);">
+            <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--secondary);">
                 <div class="card-header">
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 100%;">
+                    <div>
                         <span class="badge badge-free">Screen 01</span>
-                        <strong style="color: var(--text-heading); font-size: 1.05rem; word-break: break-word; overflow-wrap: anywhere; display: inline-block;">Animated Onboarding & Permission Tour (`OnboardingScreen`)</strong>
+                        <strong style="color: var(--text-heading); font-size: 1.15rem; margin-left: 8px;">Animated Onboarding & Permission Tour (`OnboardingScreen`)</strong>
                     </div>
                     <span class="badge badge-pro">Lottie + Interactive Stepper</span>
                 </div>
@@ -3037,11 +3278,11 @@ dev_dependencies:
             </div>
 
             <!-- SCREEN 2: AUTH SCREEN -->
-            <div class="card screen-card" style="border-left: 4px solid var(--primary);">
+            <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--primary);">
                 <div class="card-header">
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 100%;">
+                    <div>
                         <span class="badge badge-free">Screen 02</span>
-                        <strong style="color: var(--text-heading); font-size: 1.05rem; word-break: break-word; overflow-wrap: anywhere; display: inline-block;">Google OAuth & Biometric Gateway (`AuthScreen`)</strong>
+                        <strong style="color: var(--text-heading); font-size: 1.15rem; margin-left: 8px;">Google OAuth & Biometric Gateway (`AuthScreen`)</strong>
                     </div>
                     <span class="badge badge-pro">Zero-Password Auth</span>
                 </div>
@@ -3069,11 +3310,11 @@ dev_dependencies:
             </div>
 
             <!-- SCREEN 3: DASHBOARD -->
-            <div class="card screen-card" style="border-left: 4px solid var(--success);">
+            <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--success);">
                 <div class="card-header">
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 100%;">
+                    <div>
                         <span class="badge badge-free">Screen 03</span>
-                        <strong style="color: var(--text-heading); font-size: 1.05rem; word-break: break-word; overflow-wrap: anywhere; display: inline-block;">Executive Security Dashboard (`DashboardScreen`)</strong>
+                        <strong style="color: var(--text-heading); font-size: 1.15rem; margin-left: 8px;">Executive Security Dashboard (`DashboardScreen`)</strong>
                     </div>
                     <span class="badge badge-pro">Main Operational Center</span>
                 </div>
@@ -3103,11 +3344,11 @@ dev_dependencies:
             </div>
 
             <!-- SCREEN 4: GALLERY SCREEN -->
-            <div class="card screen-card" style="border-left: 4px solid var(--secondary-light);">
+            <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--secondary-light);">
                 <div class="card-header">
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 100%;">
+                    <div>
                         <span class="badge badge-free">Screen 04</span>
-                        <strong style="color: var(--text-heading); font-size: 1.05rem; word-break: break-word; overflow-wrap: anywhere; display: inline-block;">Incident Evidence Gallery (`IncidentGalleryScreen`)</strong>
+                        <strong style="color: var(--text-heading); font-size: 1.15rem; margin-left: 8px;">Incident Evidence Gallery (`IncidentGalleryScreen`)</strong>
                     </div>
                     <span class="badge badge-pro" style="background:#042f2e; color:#6ee7b7; border:1px solid #059669;">100% Local Device Storage (No Cloud Storage)</span>
                 </div>
@@ -3143,11 +3384,11 @@ dev_dependencies:
             </div>
 
             <!-- SCREEN 5: INCIDENT DETAIL SCREEN -->
-            <div class="card screen-card" style="border-left: 4px solid var(--danger);">
+            <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--danger);">
                 <div class="card-header">
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 100%;">
+                    <div>
                         <span class="badge badge-free">Screen 05</span>
-                        <strong style="color: var(--text-heading); font-size: 1.05rem; word-break: break-word; overflow-wrap: anywhere; display: inline-block;">Incident Forensic Detail (`IncidentDetailScreen`)</strong>
+                        <strong style="color: var(--text-heading); font-size: 1.15rem; margin-left: 8px;">Incident Forensic Detail (`IncidentDetailScreen`)</strong>
                     </div>
                     <span class="badge badge-pro" style="background:#042f2e; color:#6ee7b7; border:1px solid #059669;">100% On-Device Playback (No Cloud Streaming)</span>
                 </div>
@@ -3183,11 +3424,11 @@ dev_dependencies:
             </div>
 
             <!-- SCREEN 6: SUBSCRIPTION PAYWALL SCREEN -->
-            <div class="card screen-card" style="border-left: 4px solid var(--purple);">
+            <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--purple);">
                 <div class="card-header">
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 100%;">
+                    <div>
                         <span class="badge badge-free">Screen 06</span>
-                        <strong style="color: var(--text-heading); font-size: 1.05rem; word-break: break-word; overflow-wrap: anywhere; display: inline-block;">PRO Subscription & Lifetime Paywall (`SubscriptionPaywallScreen`)</strong>
+                        <strong style="color: var(--text-heading); font-size: 1.15rem; margin-left: 8px;">PRO Subscription & Lifetime Paywall (`SubscriptionPaywallScreen`)</strong>
                     </div>
                     <span class="badge badge-pro">Revenue Conversion Sheet</span>
                 </div>
@@ -3224,11 +3465,11 @@ dev_dependencies:
             </div>
 
             <!-- SCREEN 7: INTRUSION SETTINGS SCREEN -->
-            <div class="card screen-card" style="border-left: 4px solid var(--warning);">
+            <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--warning);">
                 <div class="card-header">
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 100%;">
+                    <div>
                         <span class="badge badge-free">Screen 07</span>
-                        <strong style="color: var(--text-heading); font-size: 1.05rem; word-break: break-word; overflow-wrap: anywhere; display: inline-block;">Intrusion Detection Settings (`IntrusionSettingsScreen`)</strong>
+                        <strong style="color: var(--text-heading); font-size: 1.15rem; margin-left: 8px;">Intrusion Detection Settings (`IntrusionSettingsScreen`)</strong>
                     </div>
                     <span class="badge badge-pro">Trigger & Evidence Rules</span>
                 </div>
@@ -3257,11 +3498,11 @@ dev_dependencies:
             </div>
 
             <!-- SCREEN 8: SIM GUARDIAN SCREEN -->
-            <div class="card screen-card" style="border-left: 4px solid var(--secondary);">
+            <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--secondary);">
                 <div class="card-header">
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 100%;">
+                    <div>
                         <span class="badge badge-free">Screen 08</span>
-                        <strong style="color: var(--text-heading); font-size: 1.05rem; word-break: break-word; overflow-wrap: anywhere; display: inline-block;">SIM Card Guardian & Network Monitor (`SimGuardianScreen`)</strong>
+                        <strong style="color: var(--text-heading); font-size: 1.15rem; margin-left: 8px;">SIM Card Guardian & Network Monitor (`SimGuardianScreen`)</strong>
                     </div>
                     <span class="badge badge-pro">Hardware Telephony Guard</span>
                 </div>
@@ -3290,11 +3531,11 @@ dev_dependencies:
             </div>
 
             <!-- SCREEN 9: ALERT RECIPIENTS SCREEN -->
-            <div class="card screen-card" style="border-left: 4px solid var(--primary-light);">
+            <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--primary-light);">
                 <div class="card-header">
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 100%;">
+                    <div>
                         <span class="badge badge-free">Screen 09</span>
-                        <strong style="color: var(--text-heading); font-size: 1.05rem; word-break: break-word; overflow-wrap: anywhere; display: inline-block;">Alert Email Recipients (`RecipientsScreen`)</strong>
+                        <strong style="color: var(--text-heading); font-size: 1.15rem; margin-left: 8px;">Alert Email Recipients (`RecipientsScreen`)</strong>
                     </div>
                     <span class="badge badge-pro">Multi-Channel Delivery</span>
                 </div>
@@ -3327,11 +3568,11 @@ dev_dependencies:
             </div>
 
             <!-- SCREEN 10: STEALTH & APP LOCK SCREEN -->
-            <div class="card screen-card" style="border-left: 4px solid var(--danger);">
+            <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--danger);">
                 <div class="card-header">
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 100%;">
+                    <div>
                         <span class="badge badge-free">Screen 10</span>
-                        <strong style="color: var(--text-heading); font-size: 1.05rem; word-break: break-word; overflow-wrap: anywhere; display: inline-block;">Stealth Mode & In-App Security (`StealthSecurityScreen`)</strong>
+                        <strong style="color: var(--text-heading); font-size: 1.15rem; margin-left: 8px;">Stealth Mode & In-App Security (`StealthSecurityScreen`)</strong>
                     </div>
                     <span class="badge badge-pro">Privacy & Self-Defense</span>
                 </div>
@@ -3358,9 +3599,7 @@ dev_dependencies:
                 </div>
             </div>
 
-            
-            </div><!-- /screen-catalog-container -->
-<!-- SUBSECTION 9.4: PUSH NOTIFICATION SERVICE ARCHITECTURE -->
+            <!-- SUBSECTION 9.4: PUSH NOTIFICATION SERVICE ARCHITECTURE -->
             <div class="card" style="margin-bottom: 24px; border: 1px solid var(--border-accent);">
                 <div class="card-header">
                     <div class="card-title"><i class="fa-solid fa-bell text-warning"></i> 9.4 Push Notification Service Architecture (Flutter Client + Laravel Backend)</div>
@@ -4378,13 +4617,195 @@ class SendIntrusionAlertEmailJob implements ShouldQueue
 
     </div><!-- /page-container -->
 
-    <!-- Mermaid Initialization Script -->
+    <!-- Mermaid Initialization & High-Resolution Diagram Drag, Pan & Zoom Controller Script -->
     <script>
+        // High-Resolution Base Dimensions and State for All Diagrams
+        const DIAGRAM_CONFIG = {
+            'diagram-topology-1': { baseWidth: 1550, scale: 1.0 },
+            'diagram-purge-2': { baseWidth: 1250, scale: 1.0 },
+            'diagram-intrusion-3': { baseWidth: 1250, scale: 1.0 },
+            'diagram-auth-4': { baseWidth: 1250, scale: 1.0 },
+            'diagram-state-5': { baseWidth: 1100, scale: 1.0 },
+            'diagram-erd-6': { baseWidth: 1400, scale: 1.0 }
+        };
+
+        function zoomDiagram(containerId, delta) {
+            const config = DIAGRAM_CONFIG[containerId];
+            if (!config) return;
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const svg = container.querySelector('.diagram-canvas svg');
+            if (!svg) return;
+
+            let newScale = config.scale + delta;
+            newScale = Math.round(Math.max(0.5, Math.min(3.0, newScale)) * 100) / 100;
+            config.scale = newScale;
+
+            const targetWidth = Math.round(config.baseWidth * newScale);
+            svg.style.setProperty('min-width', targetWidth + 'px', 'important');
+            svg.style.setProperty('width', targetWidth + 'px', 'important');
+
+            const badge = document.getElementById('zoom-val-' + containerId);
+            if (badge) {
+                badge.textContent = Math.round(newScale * 100) + '%';
+            }
+        }
+
+        function resetDiagram(containerId) {
+            const config = DIAGRAM_CONFIG[containerId];
+            if (!config) return;
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const canvas = container.querySelector('.diagram-canvas');
+            const svg = container.querySelector('.diagram-canvas svg');
+            if (!svg || !canvas) return;
+
+            config.scale = 1.0;
+            svg.style.setProperty('min-width', config.baseWidth + 'px', 'important');
+            svg.style.setProperty('width', config.baseWidth + 'px', 'important');
+
+            canvas.scrollLeft = 0;
+            canvas.scrollTop = 0;
+
+            const badge = document.getElementById('zoom-val-' + containerId);
+            if (badge) {
+                badge.textContent = '100%';
+            }
+        }
+
+        function centerDiagram(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const canvas = container.querySelector('.diagram-canvas');
+            if (!canvas) return;
+
+            const maxScrollX = canvas.scrollWidth - canvas.clientWidth;
+            const maxScrollY = canvas.scrollHeight - canvas.clientHeight;
+            if (maxScrollX > 0) {
+                canvas.scrollLeft = Math.round(maxScrollX / 2);
+            }
+            if (maxScrollY > 0) {
+                canvas.scrollTop = Math.round(maxScrollY / 2);
+            }
+        }
+
+        // Attach Mouse Drag-to-Pan, Touch Pan, and Wheel Navigation
+        function initDiagramCanvasInteractivity() {
+            document.querySelectorAll('.diagram-container').forEach(function(container) {
+                const containerId = container.id;
+                const canvas = container.querySelector('.diagram-canvas');
+                if (!canvas || canvas.dataset.interactivityInit) return;
+                canvas.dataset.interactivityInit = 'true';
+
+                let isDown = false;
+                let startX = 0;
+                let startY = 0;
+                let startScrollLeft = 0;
+                let startScrollTop = 0;
+
+                // Mouse Down -> start click & drag pan
+                canvas.addEventListener('mousedown', function(e) {
+                    if (e.button !== 0) return; // Left mouse click only
+                    isDown = true;
+                    canvas.classList.add('is-dragging');
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    startScrollLeft = canvas.scrollLeft;
+                    startScrollTop = canvas.scrollTop;
+                });
+
+                // Window MouseMove -> pan canvas in 2D
+                window.addEventListener('mousemove', function(e) {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    canvas.scrollLeft = startScrollLeft - dx;
+                    canvas.scrollTop = startScrollTop - dy;
+                });
+
+                // Window MouseUp -> release drag
+                window.addEventListener('mouseup', function() {
+                    if (isDown) {
+                        isDown = false;
+                        canvas.classList.remove('is-dragging');
+                    }
+                });
+
+                // Mobile / Tablet Touch Pan Support
+                let touchX = 0;
+                let touchY = 0;
+                let touchScrollX = 0;
+                let touchScrollY = 0;
+
+                canvas.addEventListener('touchstart', function(e) {
+                    if (e.touches.length === 1) {
+                        touchX = e.touches[0].clientX;
+                        touchY = e.touches[0].clientY;
+                        touchScrollX = canvas.scrollLeft;
+                        touchScrollY = canvas.scrollTop;
+                    }
+                }, { passive: true });
+
+                canvas.addEventListener('touchmove', function(e) {
+                    if (e.touches.length === 1) {
+                        const dx = e.touches[0].clientX - touchX;
+                        const dy = e.touches[0].clientY - touchY;
+                        canvas.scrollLeft = touchScrollX - dx;
+                        canvas.scrollTop = touchScrollY - dy;
+                    }
+                }, { passive: true });
+
+                // Ctrl or Cmd + Wheel -> Zoom In / Out
+                canvas.addEventListener('wheel', function(e) {
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        const delta = e.deltaY < 0 ? 0.15 : -0.15;
+                        zoomDiagram(containerId, delta);
+                    }
+                }, { passive: false });
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize drag and scroll immediately on diagram canvases
+            initDiagramCanvasInteractivity();
+
             mermaid.initialize({
                 startOnLoad: true,
                 theme: 'dark',
                 securityLevel: 'loose',
+                fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif",
+                fontSize: 16,
+                flowchart: {
+                    useMaxWidth: false,
+                    htmlLabels: true,
+                    curve: 'basis',
+                    nodeSpacing: 55,
+                    rankSpacing: 65,
+                    padding: 20
+                },
+                sequence: {
+                    useMaxWidth: false,
+                    actorFontSize: 16,
+                    actorFontFamily: "'Plus Jakarta Sans', sans-serif",
+                    actorFontWeight: 700,
+                    noteFontSize: 14,
+                    messageFontSize: 15,
+                    messageFontFamily: "'JetBrains Mono', monospace",
+                    boxMargin: 12,
+                    boxTextMargin: 6,
+                    noteMargin: 10,
+                    messageMargin: 35
+                },
+                er: {
+                    useMaxWidth: false,
+                    fontSize: 15
+                },
+                state: {
+                    useMaxWidth: false,
+                    fontSize: 15
+                },
                 themeVariables: {
                     darkMode: true,
                     background: '#0e1526',
@@ -4393,9 +4814,32 @@ class SendIntrusionAlertEmailJob implements ShouldQueue
                     primaryBorderColor: '#6366f1',
                     lineColor: '#38bdf8',
                     secondaryColor: '#1e293b',
-                    tertiaryColor: '#151f38'
+                    tertiaryColor: '#151f38',
+                    fontSize: '16px',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif"
                 }
             });
+
+            // Polling check to ensure SVGs are sized and cleaned once rendered
+            let attempts = 0;
+            const postRenderInterval = setInterval(function() {
+                attempts++;
+                const svgs = document.querySelectorAll('.diagram-container svg');
+                if (svgs.length >= 6 || attempts > 20) {
+                    clearInterval(postRenderInterval);
+                    svgs.forEach(function(svg) {
+                        svg.style.maxWidth = 'none';
+                        svg.removeAttribute('width');
+                        const container = svg.closest('.diagram-container');
+                        if (container && DIAGRAM_CONFIG[container.id]) {
+                            const baseW = DIAGRAM_CONFIG[container.id].baseWidth;
+                            svg.style.setProperty('min-width', baseW + 'px', 'important');
+                            svg.style.setProperty('width', baseW + 'px', 'important');
+                        }
+                    });
+                    initDiagramCanvasInteractivity();
+                }
+            }, 150);
         });
     </script>
 </body>

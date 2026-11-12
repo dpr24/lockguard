@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Decision document comparing Google Play Billing with Razorpay plus Google Play alternative billing for an Android anti-intruder photo-capturing subscription app in India.">
+<title>Subscription Billing Strategy | Anti-Intruder App</title>
+<style>
+:root{--navy:#14243a;--blue:#1769aa;--cyan:#eaf5fc;--ink:#263445;--muted:#607080;--line:#dce4ec;--bg:#f4f7fb;--white:#fff;--green:#18794e;--greenbg:#eaf7f0;--amber:#946200;--amberbg:#fff6df;--red:#a33b36}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.68 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+a{color:var(--blue);overflow-wrap:anywhere}.wrap{max-width:1120px;margin:auto;padding:28px 22px 64px}
+.hero{background:linear-gradient(135deg,#14243a,#1b5684);color:#fff;border-radius:20px;padding:42px 42px 36px;box-shadow:0 12px 34px #12243a20}
+.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:11px;font-weight:800;color:#b8dcf5}.hero h1{font-size:clamp(29px,4vw,43px);line-height:1.12;margin:12px 0 14px;max-width:850px}.hero p{max-width:850px;color:#e1edf7;font-size:16px;margin:0}
+.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.meta span{border:1px solid #ffffff45;border-radius:30px;padding:5px 11px;font-size:12px;color:#e7f2fa}
+.toc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:22px 0}.toc strong{display:block;margin-bottom:8px}.toc ul{columns:2;margin:0;padding-left:20px}.toc li{break-inside:avoid;margin:3px 0}
+section{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:27px 30px;margin:18px 0;box-shadow:0 4px 16px #14243a08}
+h2{font-size:23px;line-height:1.25;color:var(--navy);margin:0 0 14px}h3{font-size:17px;color:var(--navy);margin:22px 0 8px}p{margin:9px 0}ul,ol{padding-left:22px}li{margin:6px 0}
+.lead{font-size:17px;color:#34485b}.callout{padding:16px 18px;border-radius:12px;margin:16px 0;background:var(--cyan);border-left:4px solid var(--blue)}.good{background:var(--greenbg);border-left-color:var(--green)}.caution{background:var(--amberbg);border-left-color:#d49a17}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.panel{border:1px solid var(--line);border-radius:12px;padding:17px}.panel h3{margin:0 0 7px}.tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:#edf2f7;color:#43566a}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid var(--line)}th{background:#f0f5f9;color:var(--navy);font-weight:750}td:first-child{font-weight:650;width:22%}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:14px 0}.step{flex:1 1 145px;border:1px solid #cbd9e5;background:#f6faff;border-radius:10px;padding:12px;text-align:center;font-size:13px}.arrow{align-self:center;color:#7890a5;font-weight:800}
+.small{font-size:13px;color:var(--muted)}.source-list li{margin:10px 0}.footer{color:var(--muted);font-size:12px;text-align:center;padding:18px}
+@media(max-width:700px){.wrap{padding:14px 12px 36px}.hero{padding:28px 22px}.toc ul{columns:1}section{padding:21px 18px}.grid{grid-template-columns:1fr}table{display:block;overflow-x:auto;white-space:normal}td:first-child{min-width:145px}}
+@media print{body{background:#fff}.wrap{max-width:none;padding:0}.hero,section,.toc{box-shadow:none;break-inside:avoid}.hero{border-radius:0}a{color:inherit;text-decoration:none}.toc{break-after:page}section{margin:12px 0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <div class="eyebrow">Product &amp; Engineering Decision Brief</div>
+  <h1>Choosing the Right Subscription Billing Model</h1>
+  <p>Google Play Billing versus Razorpay combined with Google Play’s India alternative billing programme for an Android anti-intruder photo-capturing application.</p>
+  <div class="meta"><span>Prepared for Management &amp; Client Discussion</span><span>Market: India</span><span>Reference date: 12 November 2026</span><span>Platform: Android / Google Play</span></div>
+</header>
+
+<nav class="toc" aria-label="Contents"><strong>In this document</strong><ul>
+<li><a href="#executive">Executive recommendation</a></li><li><a href="#product">What is being sold?</a></li>
+<li><a href="#models">The two billing models</a></li><li><a href="#complexity">Why dual billing is harder</a></li>
+<li><a href="#lifecycle">Subscription lifecycle &amp; access</a></li><li><a href="#architecture">Technical architecture</a></li>
+<li><a href="#comparison">Side-by-side comparison</a></li><li><a href="#costs">Fees and commercial considerations</a></li>
+<li><a href="#risks">Risks, testing and maintenance</a></li><li><a href="#plan">Recommended implementation plan</a></li>
+<li><a href="#decision">Decision requested</a></li><li><a href="#sources">Official references</a></li>
+</ul></nav>
+
+<section id="executive">
+<h2>1. Executive recommendation</h2>
+<p class="lead"><strong>Use Google Play Billing as the sole in-app subscription checkout for the Android app at launch.</strong> Keep subscription entitlement checks on the backend, but avoid introducing Razorpay and an alternative-billing flow unless there is a proven commercial reason to do so.</p>
+<div class="callout good"><strong>Recommended approach:</strong> The user selects a plan in the app, completes the purchase through the Google Play purchase sheet, and the app/backend verifies the purchase before enabling premium protection features. Google Play manages the store-side recurring subscription, payment method, renewal, cancellation and subscription-management experience.</div>
+<p>This is the most straightforward model for a Play-distributed Android app selling digital functionality. A subscription that unlocks premium app features—such as additional intruder captures, cloud backup, extended history, alerts or other in-app capabilities—is a digital service. Google Play’s Payments policy generally requires Play Billing for such in-app digital purchases unless an applicable programme or exception is used.</p>
+<p>Google Play Billing does <em>not</em> remove all engineering work. The app still needs secure server-side purchase verification, a subscription entitlement database, feature gating, restore/reconciliation handling and lifecycle notifications. It does, however, avoid building and maintaining a second payment and subscription platform.</p>
+<div class="callout caution"><strong>Important India-specific policy note (checked 12 November 2026):</strong> Google documents a country-specific India programme that permits an alternative billing system alongside Play Billing. Under that India page, an alternative-billing transaction receives a 4 percentage-point reduction in the applicable Google Play service fee—not a waiver of the fee. The separate newer “billing choice” market list published for other regions does not list India. Do not assume those newer programme fee tables apply to India. Reconfirm the app’s exact Play Console eligibility and terms before implementing any alternative route.</div>
+</section>
+
+<section id="product">
+<h2>2. What is being sold?</h2>
+<p>The app is not merely selling a physical camera or a one-time hardware item. It is selling access to software capabilities for a defined subscription period. Examples may include:</p>
+<ul>
+<li>Intruder-attempt photo capture and access to captured evidence.</li>
+<li>Higher capture limits, extended event history or additional protected devices, if offered by the product.</li>
+<li>Push notifications or alerts when an intruder attempt is detected, where supported and enabled.</li>
+<li>Cloud backup, remote access, export or other premium security features, if included in the plan.</li>
+<li>Premium settings and automation that are unavailable on the free tier.</li>
+</ul>
+<p>These are digital features delivered by the app/service. The subscription should therefore be treated as a digital subscription, not as a physical-goods payment. The exact feature list and plan limits must be defined by the product owner before implementation.</p>
+<div class="callout"><strong>Entitlement principle:</strong> Payment grants a time-bound entitlement to specified features. It should not permanently unlock premium features merely because the app once received a successful payment callback.</div>
+</section>
+
+<section id="models">
+<h2>3. Understanding the two billing models</h2>
+<div class="grid">
+<div class="panel">
+<span class="tag">Model A · Recommended</span>
+<h3>Google Play Billing only</h3>
+<ol><li>App requests available subscription products and offers from Google Play.</li><li>User chooses a plan and confirms in Google Play’s purchase interface.</li><li>App receives purchase information and sends the purchase token to the secure backend.</li><li>Backend verifies the purchase with Google Play Developer API.</li><li>Backend grants or updates the user’s subscription entitlement.</li><li>Google Play handles store-side renewal and cancellation; notifications keep the backend synchronised.</li></ol>
+<p><strong>Result:</strong> One checkout system and one authoritative store subscription record for Play purchases.</p>
+</div>
+<div class="panel">
+<span class="tag">Model B · More complex</span>
+<h3>Google Play + Razorpay alternative billing</h3>
+<ol><li>App must present the required billing choice experience to eligible Indian users.</li><li>User chooses either Google Play Billing or the alternative payment route.</li><li>For the alternative route, app/backend creates an order and Razorpay processes payment.</li><li>Backend verifies Razorpay payment and handles webhook events.</li><li>Backend creates/updates a separate subscription record and entitlement.</li><li>Alternative transactions must also be reported to Google within the applicable programme deadline.</li><li>Developer must manage alternative subscription renewal, cancellation, refunds, support and disputes.</li></ol>
+<p><strong>Result:</strong> Two checkout paths and two sets of transaction/subscription events to reconcile.</p>
+</div>
+</div>
+<p>“Alternative billing alongside Google Play Billing” means the developer is not simply replacing Google Play. Users must retain the Google Play Billing option and be offered the applicable choice. The India programme also has onboarding, trust-and-safety, reporting and service-fee requirements.</p>
+</section>
+
+<section id="complexity">
+<h2>4. Why Razorpay + alternative billing is more difficult</h2>
+<h3>4.1 Two payment systems must be integrated</h3>
+<p>The app needs to initialise and handle Google Play Billing, and separately integrate Razorpay checkout/order creation, payment success/failure callbacks and backend verification. The two systems have different identifiers, statuses, error cases and support flows. A single “payment successful” UI callback cannot be treated as proof for both.</p>
+<h3>4.2 Two subscription lifecycles must be maintained</h3>
+<p>Google Play manages its own recurring subscription lifecycle. Razorpay payment acceptance does not automatically create an equivalent Google Play subscription. The developer must design the alternative subscription contract: billing interval, renewal attempts, payment reminders, grace period, expiry, cancellation, plan changes and retry rules. If the chosen Razorpay product supports a recurring mandate/subscription workflow, that workflow still needs its own integration and reconciliation; a normal one-time payment checkout is not a complete auto-renewing subscription system.</p>
+<h3>4.3 Alternative transactions must be reported to Google</h3>
+<p>For the India alternative billing programme, Google states that authorised alternative-billing transactions must be reported within 24 hours using the alternative billing APIs. Google also requires programme enrolment and associated configuration. Missing, duplicated or delayed reporting can create compliance and financial reconciliation issues.</p>
+<h3>4.4 Compliance and customer support obligations increase</h3>
+<ul><li>Complete the relevant Play Console alternative-billing enrolment and terms.</li><li>Meet PCI DSS obligations where the business handles card data; use a compliant provider-hosted checkout to reduce direct card-data exposure, but do not assume this removes every compliance obligation.</li><li>Provide a way for users to report fraudulent or unauthorised alternative transactions.</li><li>Provide customer support, order history, subscription management and refund-request routes for alternative purchases.</li><li>Handle refund, dispute and chargeback outcomes and ensure entitlements are adjusted correctly.</li></ul>
+<h3>4.5 The backend becomes a payment orchestration system</h3>
+<p>The backend must identify which provider owns each subscription, verify provider-specific events, map them to a common entitlement model, prevent duplicate grants, reconcile mismatched states and keep an auditable transaction history. It must also handle webhook retries, signature validation, idempotency and out-of-order events.</p>
+<h3>4.6 More test cases and more failure points</h3>
+<p>Every important subscription scenario must be tested for both payment routes: successful purchase, pending/failed payment, duplicate callback, renewal, cancellation, refund, chargeback, expired plan, restored access, user changing devices, account mismatch and network interruption. The test matrix and regression effort are substantially larger.</p>
+<div class="callout caution"><strong>Cost-saving misconception:</strong> Alternative billing does not mean “avoid Google fees and pay only Razorpay”. Under Google’s India programme, the applicable Play service fee remains payable, with a 4 percentage-point reduction for the alternative-billing transaction. Razorpay processing/other charges may also apply. The business must compare the total cost, not just the gateway fee.</div>
+</section>
+
+<section id="lifecycle">
+<h2>5. Subscription lifecycle and premium-feature access</h2>
+<p>For a security app, entitlement correctness is critical. A user whose subscription has expired should not continue to receive premium features indefinitely; equally, a valid subscriber should not lose access because the phone temporarily lost connectivity.</p>
+<table><thead><tr><th>Subscription state / event</th><th>Recommended app behaviour</th></tr></thead><tbody>
+<tr><td>Active / verified</td><td>Enable the features and limits included in the purchased plan.</td></tr>
+<tr><td>Cancelled by user</td><td>Keep access until the paid-through expiry time if the subscription remains active until then. Show that auto-renewal is off.</td></tr>
+<tr><td>Payment grace period</td><td>For Play subscriptions, retain entitlement during the recognised grace period. Explain that the user should fix the payment method in Google Play.</td></tr>
+<tr><td>Account hold / paused</td><td>Follow the verified store state and plan policy; normally suspend paid entitlement while the subscription is on hold or paused.</td></tr>
+<tr><td>Expired / revoked / refunded</td><td>Remove premium entitlement according to the verified event/state. Preserve user-owned data according to the product’s retention policy.</td></tr>
+<tr><td>Restore / new device</td><td>Re-check purchases and backend account mapping; do not rely only on locally stored “premium=true”.</td></tr>
+<tr><td>Pending purchase</td><td>Do not unlock paid features until the purchase is confirmed as purchased and verified.</td></tr>
+</tbody></table>
+<p>Google Play documents subscription states including active, cancelled, grace period, on hold, paused and expired. It recommends processing purchases securely on the backend and using Real-time Developer Notifications (RTDN) to keep subscription status current.</p>
+<div class="callout good"><strong>Suggested entitlement design:</strong> Keep a server-side record such as <code>user_id</code>, <code>provider</code>, <code>product_id</code>, <code>purchase_token_reference</code>, <code>status</code>, <code>start_at</code>, <code>expires_at</code>, <code>auto_renew_enabled</code>, <code>last_verified_at</code> and plan feature limits. The app asks the backend for the current entitlement; it does not decide premium access from a local flag alone.</div>
+</section>
+
+<section id="architecture">
+<h2>6. Recommended technical architecture</h2>
+<h3>Google Play Billing-only flow</h3>
+<div class="flow">
+<div class="step"><strong>Flutter app</strong><br>Show plans and initiate purchase</div><div class="arrow">→</div>
+<div class="step"><strong>Google Play</strong><br>Checkout, payment and subscription</div><div class="arrow">→</div>
+<div class="step"><strong>Secure backend</strong><br>Verify purchase token</div><div class="arrow">→</div>
+<div class="step"><strong>Entitlement service</strong><br>Grant plan features</div>
+</div>
+<div class="flow">
+<div class="step"><strong>Google RTDN</strong><br>Renewal / cancellation / hold / expiry events</div><div class="arrow">→</div>
+<div class="step"><strong>Backend</strong><br>Fetch latest state from Play Developer API</div><div class="arrow">→</div>
+<div class="step"><strong>App</strong><br>Refresh feature access</div>
+</div>
+<h3>Additional components required for Razorpay alternative billing</h3>
+<div class="flow">
+<div class="step"><strong>Billing choice UI</strong><br>Offer compliant choice</div><div class="arrow">→</div>
+<div class="step"><strong>Razorpay</strong><br>Order / payment / mandate as applicable</div><div class="arrow">→</div>
+<div class="step"><strong>Webhook service</strong><br>Verify signature and event</div><div class="arrow">→</div>
+<div class="step"><strong>Alternative subscription engine</strong><br>Renewal, retry, cancellation, refund</div>
+</div>
+<div class="flow">
+<div class="step"><strong>Google alternative billing APIs</strong><br>Report eligible authorised transactions</div><div class="arrow">→</div>
+<div class="step"><strong>Finance reconciliation</strong><br>Razorpay + internal ledger + Google fee reporting</div>
+</div>
+<p>The second model adds components; it does not remove the first model. The application and backend must continue supporting Google Play Billing for users who choose it.</p>
+<h3>Suggested backend safeguards (both models)</h3>
+<ul><li>Verify purchase/payment evidence on the server; never trust a client-only success callback.</li><li>Validate webhook signatures and use idempotency keys/event IDs to prevent duplicate processing.</li><li>Use a single entitlement service so feature gating is consistent throughout the app.</li><li>Store provider, product/plan, transaction reference, state and expiry in an auditable format.</li><li>Reconcile with the provider APIs periodically; notifications can be delayed or missed.</li><li>Map purchases to the correct app account using a stable, non-sensitive account identifier where supported.</li><li>Keep a short, controlled offline entitlement cache if product requirements demand it, with server revalidation when connectivity returns.</li></ul>
+</section>
+
+<section id="comparison">
+<h2>7. Side-by-side comparison</h2>
+<table><thead><tr><th>Area</th><th>Google Play Billing only</th><th>Google Play + Razorpay alternative billing</th></tr></thead><tbody>
+<tr><td>Checkout</td><td>One familiar Play purchase flow.</td><td>Two checkout paths and a billing-choice experience.</td></tr>
+<tr><td>Recurring billing</td><td>Play manages store subscription renewals.</td><td>Developer must operate the alternative recurring-payment lifecycle separately.</td></tr>
+<tr><td>Verification</td><td>Verify Play purchase token with Google backend API.</td><td>Verify Play tokens and Razorpay payments/subscription events.</td></tr>
+<tr><td>Renewal events</td><td>Play RTDN and Developer API.</td><td>Play RTDN plus Razorpay webhook/recurring events and internal reconciliation.</td></tr>
+<tr><td>Cancellation &amp; refunds</td><td>Mostly managed through Play subscription/order flows; backend updates entitlement.</td><td>Separate cancellation/refund/support process for Razorpay-originated subscriptions.</td></tr>
+<tr><td>Reporting to Google</td><td>No alternative transaction reporting workflow.</td><td>India programme reporting within 24 hours through alternative billing APIs.</td></tr>
+<tr><td>Compliance</td><td>Standard Play policy and app obligations.</td><td>Additional programme enrolment, PCI DSS-related obligations, fraud reporting and support requirements.</td></tr>
+<tr><td>Customer experience</td><td>Subscription visible in Play subscriptions management.</td><td>Different management experience depending on purchase route; users need clear instructions.</td></tr>
+<tr><td>Development effort</td><td>Lower; one provider integration.</td><td>Higher; two providers, unified entitlements and additional compliance work.</td></tr>
+<tr><td>Ongoing maintenance</td><td>One primary billing integration and lifecycle.</td><td>Two integrations, two event streams, reconciliation and support procedures.</td></tr>
+<tr><td>Best fit</td><td>Android app whose users buy digital app features.</td><td>Business with a validated need for an additional payment choice and resources to operate it.</td></tr>
+</tbody></table>
+</section>
+
+<section id="costs">
+<h2>8. Fees and commercial considerations</h2>
+<p>Do not decide based on a headline percentage alone. The finance team should compare the full cost per successful subscription and the operational cost of running the alternative route.</p>
+<table><thead><tr><th>Cost item</th><th>Google Play Billing only</th><th>Alternative billing in India</th></tr></thead><tbody>
+<tr><td>Google Play service fee</td><td>Applicable Play service fee for the developer/account and transaction.</td><td>Applicable service fee remains payable; Google’s India programme states a 4 percentage-point reduction for alternative-billing transactions.</td></tr>
+<tr><td>Payment gateway fee</td><td>No separate Razorpay gateway integration/charge for the Play checkout.</td><td>Razorpay processing or other applicable charges may apply under the merchant agreement.</td></tr>
+<tr><td>Engineering and QA</td><td>One billing flow and lifecycle to implement and test.</td><td>Additional integration, compliance, reporting, QA and reconciliation effort.</td></tr>
+<tr><td>Support and operations</td><td>Play handles store-side subscription management and payment collection; developer still handles app/account support.</td><td>Developer must also support alternative orders, payment disputes, refunds and subscription management.</td></tr>
+</tbody></table>
+<p><strong>Illustrative fee logic, not a quote:</strong> If the applicable Play service fee for a particular transaction were 15%, the India page’s 4 percentage-point reduction would make the alternative route’s Play fee 11%, before any Razorpay fee, taxes, internal operating cost or other applicable charges. This example does not assert that 15% is the rate for this developer. The actual rate depends on Play programme eligibility, revenue thresholds, product category and the developer’s account terms.</p>
+<p>Google’s India help page says that developers who do not offer alternative billing and already use Play Billing do not need to take action to add an alternative system. It also states that 99% of developers qualify for a service fee of 15% or less; the exact account-specific fee should be confirmed in Play Console.</p>
+<div class="callout"><strong>Business test:</strong> Implement the alternative route only if the expected net savings or measurable conversion improvement is greater than the gateway cost, engineering cost, ongoing support cost, compliance effort and added risk. A 4 percentage-point reduction in Google’s fee is not automatically a 4-point net saving.</div>
+</section>
+
+<section id="risks">
+<h2>9. Risks, testing and maintenance responsibilities</h2>
+<table><thead><tr><th>Risk</th><th>Impact</th><th>Control</th></tr></thead><tbody>
+<tr><td>Client callback treated as payment proof</td><td>Unauthorised premium access.</td><td>Backend verification before entitlement grant.</td></tr>
+<tr><td>Renewal event missed or delayed</td><td>Wrong access state.</td><td>RTDN/webhook processing plus scheduled reconciliation.</td></tr>
+<tr><td>Duplicate event or retry</td><td>Duplicate subscription or ledger entry.</td><td>Idempotent event processing and unique provider references.</td></tr>
+<tr><td>Wrong app account linked</td><td>Premium features granted to the wrong user.</td><td>Bind purchase to the authenticated account and provide a clear account-recovery process.</td></tr>
+<tr><td>Refund/chargeback not reflected</td><td>Access remains active after reversal.</td><td>Process revocation/refund events and periodically reconcile.</td></tr>
+<tr><td>Alternative transaction not reported on time</td><td>Programme compliance and invoicing risk.</td><td>Automated reporting, retry queue, monitoring and audit logs.</td></tr>
+<tr><td>Expired plan still enables protection features</td><td>Revenue leakage and inconsistent product behaviour.</td><td>Central backend entitlement checks and explicit expiry rules.</td></tr>
+</tbody></table>
+<h3>Minimum test checklist for Google Play Billing</h3>
+<ul><li>New subscription purchase, including successful and cancelled checkout.</li><li>Pending purchase: no premium access until confirmed.</li><li>Renewal and expiry; cancellation before expiry and access through paid-through date.</li><li>Payment failure, grace period and account hold behaviour.</li><li>Refund/revocation and subscription restoration.</li><li>Reinstall, device change, sign-in on another device and account switching.</li><li>Backend unavailable during checkout; retry without duplicate entitlement.</li><li>Plan upgrade/downgrade or replacement, if multiple plans are offered.</li><li>App offline at launch and reconnecting later.</li></ul>
+<h3>Additional tests if Razorpay alternative billing is approved</h3>
+<ul><li>Billing choice screen, correct eligibility and correct provider selection.</li><li>Razorpay order creation, checkout success/failure, abandoned checkout and signature validation.</li><li>Recurring mandate/subscription creation, renewal success/failure, retry and cancellation.</li><li>Webhook duplication, delayed delivery, invalid signature and out-of-order event handling.</li><li>Refund, dispute/chargeback and entitlement revocation.</li><li>Alternative transaction reporting to Google within 24 hours, including retries and reconciliation.</li><li>Support links, order history, subscription management and fraud-reporting path.</li></ul>
+</section>
+
+<section id="plan">
+<h2>10. Recommended implementation plan</h2>
+<ol>
+<li><strong>Confirm product plans:</strong> Finalise plan names, duration, pricing, free-tier limits and exact premium features. Define what happens to captured photos and history after expiry.</li>
+<li><strong>Configure Play Console:</strong> Create subscription products and base plans, set regional pricing, configure renewal/grace-period settings and test with licence testers.</li>
+<li><strong>Implement Flutter purchase flow:</strong> Load products dynamically from Play, launch checkout, handle purchase updates, pending states, errors and restore/re-query behaviour.</li>
+<li><strong>Implement backend verification:</strong> Verify purchase tokens with Google Play Developer API, acknowledge eligible new purchases and persist subscription state.</li>
+<li><strong>Implement RTDN:</strong> Receive lifecycle notifications and fetch the latest subscription state from Google before updating entitlements.</li>
+<li><strong>Centralise feature access:</strong> Return plan status and feature limits from the backend. Apply the same entitlement rules to all premium screens and security operations.</li>
+<li><strong>Test the full lifecycle:</strong> Validate purchase, renewal, grace period, hold, cancellation, expiry, refund, restore and account/device changes.</li>
+<li><strong>Launch and monitor:</strong> Log verification failures, notification delays, entitlement mismatches and support issues. Reconcile subscriptions periodically.</li>
+</ol>
+<p class="small">The Flutter implementation can use a maintained Google Play Billing-compatible Flutter package or a controlled native Android billing bridge. The package choice should be checked against the current Play Billing Library requirements and the project’s Flutter/Android toolchain before development.</p>
+<h3>Responsibility split</h3>
+<table><thead><tr><th>Workstream</th><th>Flutter / Android</th><th>Backend</th><th>Business / Operations</th></tr></thead><tbody>
+<tr><td>Plan display and purchase UX</td><td>Implement</td><td>Provide plan/entitlement data as needed</td><td>Approve plan names, prices and wording</td></tr>
+<tr><td>Purchase verification</td><td>Send purchase token securely</td><td>Verify with Google and persist result</td><td>Provide Play Console/API access</td></tr>
+<tr><td>Subscription lifecycle</td><td>Refresh UI and handle restore</td><td>Process RTDN, reconcile and update entitlement</td><td>Define grace/expiry support policy</td></tr>
+<tr><td>Feature gating</td><td>Enforce UI/feature availability</td><td>Authoritative entitlement and limits</td><td>Define free vs paid feature matrix</td></tr>
+<tr><td>Support and refunds</td><td>Provide clear help/manage links</td><td>Expose subscription state and audit trail</td><td>Handle customer communication and policy</td></tr>
+</tbody></table>
+</section>
+
+<section id="decision">
+<h2>11. Decision requested from management and client</h2>
+<div class="callout good"><strong>Approve Google Play Billing-only for the initial Android release.</strong> This keeps the payment journey aligned with Google Play’s standard route and avoids the additional complexity of operating an alternative billing system before its business value is established.</div>
+<p>Revisit Razorpay alternative billing only when all of the following are true:</p>
+<ul><li>There is evidence that users need an additional payment method or that it will materially improve conversion.</li><li>A finance model demonstrates positive net benefit after Google’s adjusted service fee, Razorpay charges, taxes and ongoing operating costs.</li><li>The organisation is prepared to own alternative subscription renewals, refunds, disputes, reporting, compliance and customer support.</li><li>The current India programme terms and Play Console eligibility have been reconfirmed immediately before implementation.</li></ul>
+<p><strong>Final point:</strong> Google Play Billing is the simpler operational choice, not a “zero-backend” solution. A secure backend is still necessary to protect premium access. The recommendation is to build that backend once around verified Google Play subscription entitlements, then add another provider only if the business case justifies the extra system.</p>
+</section>
+
+<section id="sources">
+<h2>12. Official references and policy notes</h2>
+<p>The following official Google documentation was reviewed for this decision brief. Programme terms and service fees can change; confirm the current terms in Play Console before release.</p>
+<ol class="source-list">
+<li><strong>Google Play — India alternative billing requirements.</strong> Eligibility, enrolment, PCI DSS-related requirement, fraud reporting, API integration, 24-hour transaction reporting and the 4 percentage-point service-fee reduction.<br><a href="https://support.google.com/googleplay/android-developer/answer/13306652?hl=en" target="_blank" rel="noopener">https://support.google.com/googleplay/android-developer/answer/13306652</a></li>
+<li><strong>Android Developers — Integrate Google Play Billing Library.</strong> Purchase flow, backend verification, subscription states and purchase processing.<br><a href="https://developer.android.com/google/play/billing/integrate" target="_blank" rel="noopener">https://developer.android.com/google/play/billing/integrate</a></li>
+<li><strong>Android Developers — Subscription lifecycle.</strong> RTDN, subscription verification, renewal, grace period and lifecycle handling.<br><a href="https://developer.android.com/google/play/billing/lifecycle/subscriptions" target="_blank" rel="noopener">https://developer.android.com/google/play/billing/lifecycle/subscriptions</a></li>
+<li><strong>Google Play — Understanding the Payments policy.</strong> Rules on digital goods and alternative billing exceptions/programmes.<br><a href="https://support.google.com/googleplay/android-developer/answer/10281818?hl=en" target="_blank" rel="noopener">https://support.google.com/googleplay/android-developer/answer/10281818</a></li>
+<li><strong>Google Play — Billing choice programme enrolment.</strong> General programme information and market availability. Its market list is distinct from the India-specific programme linked above; do not apply its fee table to India without explicit confirmation.<br><a href="https://support.google.com/googleplay/android-developer/answer/17161464?hl=en" target="_blank" rel="noopener">https://support.google.com/googleplay/android-developer/answer/17161464</a></li>
+</ol>
+<p class="small"><strong>Disclaimer:</strong> This is a product and engineering decision document, not legal, tax or accounting advice. Google Play policy, programme availability, fee schedules, Razorpay pricing and regulatory obligations may change. The client’s legal/finance team should validate the commercial and compliance position before enabling alternative billing.</p>
+</section>
+<div class="footer">Subscription Billing Strategy · Anti-Intruder Photo-Capturing App · India · 12 November 2026</div>
+</div>
+</body>
+</html>
